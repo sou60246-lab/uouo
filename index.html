@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ドイツ語単語テスト</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f14;
+    --surface: #1a1a24;
+    --card: #22223a;
+    --accent: #c4a35a;
+    --accent2: #7b61ff;
+    --correct: #4caf8a;
+    --wrong: #e05c5c;
+    --text: #e8e8f0;
+    --muted: #7a7a9a;
+    --border: #2e2e48;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+  }
+  header {
+    text-align: center;
+    padding: 32px 0 20px;
+    width: 100%;
+    max-width: 700px;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin-bottom: 5px;
+  }
+  header p { color: var(--muted); font-size: 0.82rem; }
+  .container { width: 100%; max-width: 700px; }
+
+  /* ── SETUP ── */
+  .setup-section { margin-bottom: 22px; }
+  .setup-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .select-controls { display: flex; gap: 8px; margin-bottom: 10px; }
+  .ctrl-btn {
+    padding: 5px 13px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.76rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .set-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 9px;
+  }
+  .set-card {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 13px;
+    padding: 14px 12px;
+    cursor: pointer;
+    transition: all 0.16s;
+    text-align: center;
+    position: relative;
+    user-select: none;
+  }
+  .set-card:hover { border-color: var(--accent2); }
+  .set-card.selected { border-color: var(--accent); background: rgba(196,163,90,0.09); }
+  .set-card .snum { font-family: 'Playfair Display', serif; font-size: 1.7rem; color: var(--accent); display: block; line-height: 1; }
+  .set-card .slabel { font-size: 0.76rem; color: var(--text); margin-top: 4px; display: block; }
+  .set-card .scount { font-size: 0.69rem; color: var(--muted); margin-top: 2px; display: block; }
+  .ckmark { display: none; position: absolute; top: 7px; right: 9px; color: var(--accent); font-size: 0.8rem; }
+  .set-card.selected .ckmark { display: block; }
+
+  .summary-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 13px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 6px;
+  }
+  .sum-text { font-size: 0.85rem; color: var(--muted); }
+  .sum-text b { color: var(--text); }
+  .start-btn {
+    padding: 11px 28px;
+    border: none;
+    border-radius: 11px;
+    background: linear-gradient(135deg, var(--accent), #e0b84a);
+    color: #0f0f14;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .start-btn:hover { opacity: 0.85; }
+  .start-btn:disabled { opacity: 0.32; cursor: not-allowed; }
+
+  /* ── QUIZ ── */
+  .back-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.8rem;
+    padding: 6px 13px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 16px;
+    transition: all 0.15s;
+  }
+  .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .set-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 14px; }
+  .set-tag {
+    background: rgba(196,163,90,0.1);
+    border: 1px solid rgba(196,163,90,0.28);
+    color: var(--accent);
+    font-size: 0.72rem;
+    padding: 2px 9px;
+    border-radius: 20px;
+  }
+  .prog-wrap { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 18px; overflow: hidden; }
+  .prog-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width 0.4s ease; }
+  .stats { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; }
+  .stats b { color: var(--text); }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 30px 32px 28px;
+    text-align: center;
+    margin-bottom: 16px;
+    animation: fadeUp 0.28s ease;
+  }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+  .q-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 14px; }
+  .q-word { font-family: 'Playfair Display', serif; font-size: 1.9rem; color: var(--text); line-height: 1.3; margin-bottom: 6px; }
+  .q-sub { font-size: 0.83rem; color: var(--muted); }
+  .set-badge { display: inline-block; background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-size: 0.67rem; padding: 2px 8px; border-radius: 9px; margin-top: 9px; }
+
+  /* Step indicator */
+  .step-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 18px 0 6px;
+  }
+  .step-dot {
+    width: 28px; height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background 0.2s;
+  }
+  .step-dot.active { background: var(--accent); }
+  .step-dot.done { background: var(--correct); }
+
+  /* Article buttons */
+  .article-btns { display: flex; gap: 12px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+  .art-btn {
+    padding: 13px 30px;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    cursor: pointer;
+    transition: all 0.17s;
+    min-width: 90px;
+  }
+  .art-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+  .art-btn:disabled { cursor: default; }
+  .art-btn.correct { background: rgba(76,175,138,0.15); border-color: var(--correct); color: var(--correct); }
+  .art-btn.wrong   { background: rgba(224,92,92,0.10);  border-color: var(--wrong);   color: var(--wrong); }
+  .art-btn.reveal  { background: rgba(76,175,138,0.10); border-color: var(--correct); color: var(--correct); }
+
+  /* Text input */
+  .input-wrap { display: flex; gap: 9px; margin-top: 18px; flex-wrap: wrap; justify-content: center; }
+  .ans-input {
+    flex: 1; min-width: 180px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .ans-input:focus { border-color: var(--accent); }
+  .ans-input.correct { border-color: var(--correct); background: rgba(76,175,138,0.07); }
+  .ans-input.wrong   { border-color: var(--wrong);   background: rgba(224,92,92,0.07); }
+  .ans-input:disabled { opacity: 0.6; }
+  .check-btn {
+    padding: 12px 22px;
+    border: none; border-radius: 11px;
+    background: var(--accent); color: #0f0f14;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.92rem; font-weight: 500;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .check-btn:hover { opacity: 0.85; }
+
+  /* Feedback */
+  .feedback {
+    margin-top: 14px; padding: 11px 16px;
+    border-radius: 11px; font-size: 0.86rem;
+    display: none; animation: fadeUp 0.18s ease; text-align: left;
+  }
+  .feedback.correct { background: rgba(76,175,138,0.09); border: 1px solid var(--correct); color: var(--correct); }
+  .feedback.wrong   { background: rgba(224,92,92,0.07);  border: 1px solid var(--wrong);   color: var(--wrong); }
+  .feedback.info    { background: rgba(123,97,255,0.08); border: 1px solid var(--accent2); color: #a89aff; }
+
+  /* Answer reveal box */
+  .answer-reveal {
+    margin-top: 10px; padding: 10px 16px;
+    border-radius: 11px;
+    background: rgba(196,163,90,0.07);
+    border: 1px solid rgba(196,163,90,0.25);
+    font-size: 0.88rem; color: var(--accent);
+    display: none; text-align: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+  }
+
+  .next-btn {
+    display: none; width: 100%;
+    padding: 14px; border: none; border-radius: 11px;
+    background: linear-gradient(135deg, var(--accent), #e0b84a);
+    color: #0f0f14;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.92rem; font-weight: 500;
+    cursor: pointer; margin-top: 10px; transition: opacity 0.2s;
+  }
+  .next-btn:hover { opacity: 0.88; }
+
+  /* ── RESULT ── */
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 40px 32px;
+    text-align: center;
+    animation: fadeUp 0.35s ease;
+  }
+  .result-card h2 { font-family: 'Playfair Display', serif; font-size: 1.7rem; color: var(--accent); margin-bottom: 8px; }
+  .score-big { font-family: 'Playfair Display', serif; font-size: 3.5rem; color: var(--text); margin: 16px 0; }
+  .score-big span { font-size: 1.5rem; color: var(--muted); }
+  .result-msg { color: var(--muted); font-size: 0.9rem; margin-bottom: 22px; }
+  .wrong-list { text-align: left; margin-top: 22px; border-top: 1px solid var(--border); padding-top: 18px; }
+  .wl-title { font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px; }
+  .wrong-item {
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 8px; flex-wrap: wrap;
+  }
+  .wi-q { font-size: 0.85rem; color: var(--muted); }
+  .wi-right { text-align: right; }
+  .wi-user { font-size: 0.82rem; color: var(--wrong); }
+  .wi-correct { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--correct); }
+  .wi-badge { font-size: 0.68rem; color: var(--muted); }
+
+  .res-btns { display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap; justify-content: center; }
+  .restart-btn {
+    padding: 13px 32px; border: none; border-radius: 11px;
+    background: var(--accent); color: #0f0f14;
+    font-family: 'Noto Sans JP', sans-serif; font-size: 0.92rem; font-weight: 500;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .restart-btn:hover { opacity: 0.85; }
+  .back-top-btn {
+    padding: 13px 22px; border: 1px solid var(--border); border-radius: 11px;
+    background: transparent; color: var(--muted);
+    font-family: 'Noto Sans JP', sans-serif; font-size: 0.92rem;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .back-top-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .divider { height: 1px; background: var(--border); margin: 18px 0; }
+  footer { margin-top: 32px; color: var(--muted); font-size: 0.72rem; text-align: center; padding-bottom: 16px; }
+
+  /* ── TABS ── */
+  .tab-bar {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    max-width: 700px;
+    margin-bottom: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 5px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 10px 8px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    background: var(--card);
+    color: var(--accent);
+    font-weight: 500;
+    border: 1px solid var(--border);
+  }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  @media (max-width: 480px) {
+    .card { padding: 22px 18px 20px; }
+    .q-word { font-size: 1.6rem; }
+    .art-btn { padding: 11px 22px; font-size: 1.2rem; }
+    header h1 { font-size: 1.7rem; }
+    .tab-btn { font-size: 0.74rem; padding: 8px 4px; }
+  }
+</style>
+<style>
+.stat-box{margin:10px 0;padding:10px 12px;border:1px solid rgba(128,128,128,.3);border-radius:10px;font-size:.88rem;line-height:1.7}
+.stat-h{margin:14px 0 4px;font-weight:700;font-size:.9rem}
+.stat-row{display:flex;justify-content:space-between;gap:8px;padding:3px 2px;border-bottom:1px solid rgba(128,128,128,.15);font-size:.82rem}
+.stat-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+</style>
+
+</head>
+<body>
+
+<header>
+  <h1>Deutsch Vokabeltest</h1>
+  <p>ドイツ語単語テスト</p>
+</header>
+
+<!-- ── TAB BAR ── -->
+<div class="tab-bar" id="main-tab-bar">
+  <button class="tab-btn active" onclick="switchTab('normal')" id="tab-normal">📚 通常単語集</button>
+  <button class="tab-btn" onclick="switchTab('exam')" id="tab-exam">📝 期末2-1対策</button>
+</div>
+
+<!-- ── TAB: 通常 ── -->
+<div class="tab-pane active" id="pane-normal">
+
+<!-- ── SETUP ── -->
+<div class="container" id="setup-area">
+  <div class="setup-section">
+    <div class="setup-label">単語集を選ぶ</div>
+    <div class="select-controls">
+      <button class="ctrl-btn" onclick="selectAll()">すべて選択</button>
+      <button class="ctrl-btn" onclick="selectNone()">選択解除</button>
+    </div>
+    <div class="set-grid" id="set-grid"></div>
+  </div>
+  <div class="divider"></div>
+  <div class="summary-bar">
+    <div class="sum-text" id="sum-text">単語集を選択してください</div>
+    <button class="start-btn" id="start-btn" onclick="startQuiz()" disabled>テスト開始</button>
+  </div>
+  <div class="divider"></div>
+  <div class="select-controls" style="flex-wrap:wrap">
+    <button class="ctrl-btn" id="review-btn" onclick="startReview()">🔁 間違えた単語を復習</button>
+    <button class="ctrl-btn" onclick="toggleStats()">📊 学習記録</button>
+  </div>
+  <div id="stats-panel" style="display:none"></div>
+
+</div>
+
+<!-- ── QUIZ ── -->
+<div class="container" id="quiz-area" style="display:none;">
+  <button class="back-btn" onclick="goSetup()">← 設定に戻る</button>
+  <div class="set-tags" id="set-tags"></div>
+  <div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
+  <div class="stats">
+    <span>問題 <b id="q-num">1</b> / <b id="q-tot">?</b></span>
+    <span>正解 <b id="score-now">0</b></span>
+  </div>
+  <div class="card" id="q-card">
+    <div class="q-label" id="q-label"></div>
+    <div class="q-word" id="q-word"></div>
+    <div class="q-sub"  id="q-sub"></div>
+    <div class="set-badge" id="q-badge"></div>
+
+    <!-- 名詞: ステップ1 定冠詞 -->
+    <div id="step-article" style="display:none;">
+      <div class="step-indicator">
+        <div class="step-dot active" id="dot1"></div>
+        <div class="step-dot"        id="dot2"></div>
+      </div>
+      <div class="article-btns">
+        <button class="art-btn" onclick="answerArticle('der')">der</button>
+        <button class="art-btn" onclick="answerArticle('die')">die</button>
+        <button class="art-btn" onclick="answerArticle('das')">das</button>
+      </div>
+    </div>
+
+    <!-- 名詞: ステップ2 単語入力 -->
+    <div id="step-word" style="display:none;">
+      <div class="step-indicator">
+        <div class="step-dot done"   id="dot1b"></div>
+        <div class="step-dot active" id="dot2b"></div>
+      </div>
+      <div style="margin-top:6px; font-size:0.82rem; color:var(--muted);" id="article-result-label"></div>
+      <div class="input-wrap">
+        <input class="ans-input" type="text" id="word-input"
+          placeholder="単語を入力（例: Tisch/e）"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <button class="check-btn" onclick="checkWord()">確認</button>
+      </div>
+    </div>
+
+    <!-- 名詞以外: テキスト入力 -->
+    <div id="step-other" style="display:none;">
+      <div class="input-wrap">
+        <input class="ans-input" type="text" id="other-input"
+          placeholder="ドイツ語を入力…"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <button class="check-btn" onclick="checkOther()">確認</button>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;text-align:center"><button class="ctrl-btn" id="skip-btn" onclick="skipQ()">答えだけ確認（わかる単語）</button></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="answer-reveal" id="answer-reveal"></div>
+    <button class="next-btn" id="next-btn" onclick="nextQ()">次の問題 →</button>
+  </div>
+</div>
+
+<!-- ── RESULT ── -->
+<div class="container" id="result-area" style="display:none;">
+  <div class="result-card">
+    <h2>テスト完了！</h2>
+    <div class="score-big" id="res-score">0<span>/0</span></div>
+    <div class="result-msg" id="res-msg"></div>
+    <div class="wrong-list" id="wrong-list"></div>
+    <div class="res-btns">
+      <button class="restart-btn" onclick="restartSame()">同じ設定でもう一度</button>
+      <button class="back-top-btn" onclick="goSetup()">設定に戻る</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /pane-normal -->
+
+<!-- ── TAB: 期末2-1対策 ── -->
+<div class="tab-pane" id="pane-exam">
+<div class="container" id="exam-setup-area">
+  <div class="setup-section">
+    <div class="setup-label">📝 期末2-1対策 — 単語一覧テスト</div>
+  </div>
+  <div class="divider"></div>
+  <div class="summary-bar">
+    <div class="sum-text" id="exam-sum-text">全<b id="exam-word-count">0</b>語収録</div>
+    <button class="start-btn" onclick="startExamQuiz()">テスト開始</button>
+  </div>
+</div>
+
+<div class="container" id="exam-quiz-area" style="display:none;">
+  <button class="back-btn" onclick="goExamSetup()">← 設定に戻る</button>
+  <div class="set-tags"><span class="set-tag">📝 期末2-1対策</span></div>
+  <div class="prog-wrap"><div class="prog-bar" id="exam-prog-bar" style="width:0%"></div></div>
+  <div class="stats">
+    <span>問題 <b id="exam-q-num">1</b> / <b id="exam-q-tot">?</b></span>
+    <span>正解 <b id="exam-score-now">0</b></span>
+  </div>
+  <div class="card">
+    <div class="q-label" id="exam-q-label"></div>
+    <div class="q-word" id="exam-q-word"></div>
+    <div class="q-sub"  id="exam-q-sub"></div>
+
+    <div id="exam-step-article" style="display:none;">
+      <div class="step-indicator">
+        <div class="step-dot active"></div>
+        <div class="step-dot" id="exam-dot2"></div>
+      </div>
+      <div class="article-btns">
+        <button class="art-btn" onclick="examAnswerArticle('der')">der</button>
+        <button class="art-btn" onclick="examAnswerArticle('die')">die</button>
+        <button class="art-btn" onclick="examAnswerArticle('das')">das</button>
+      </div>
+    </div>
+
+    <div id="exam-step-word" style="display:none;">
+      <div class="step-indicator">
+        <div class="step-dot done"></div>
+        <div class="step-dot active"></div>
+      </div>
+      <div style="margin-top:6px; font-size:0.82rem; color:var(--muted);" id="exam-article-result-label"></div>
+      <div class="input-wrap">
+        <input class="ans-input" type="text" id="exam-word-input"
+          placeholder="単語を入力（例: Tisch/e）"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <button class="check-btn" onclick="examCheckWord()">確認</button>
+      </div>
+    </div>
+
+    <div id="exam-step-other" style="display:none;">
+      <div class="input-wrap">
+        <input class="ans-input" type="text" id="exam-other-input"
+          placeholder="ドイツ語を入力…"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <button class="check-btn" onclick="examCheckOther()">確認</button>
+      </div>
+    </div>
+
+    <div class="feedback" id="exam-feedback"></div>
+    <div class="answer-reveal" id="exam-answer-reveal"></div>
+    <button class="next-btn" id="exam-next-btn" onclick="examNextQ()">次の問題 →</button>
+  </div>
+</div>
+
+<div class="container" id="exam-result-area" style="display:none;">
+  <div class="result-card">
+    <h2>テスト完了！</h2>
+    <div class="score-big" id="exam-res-score">0<span>/0</span></div>
+    <div class="result-msg" id="exam-res-msg"></div>
+    <div class="wrong-list" id="exam-wrong-list"></div>
+    <div class="res-btns">
+      <button class="restart-btn" onclick="startExamQuiz()">もう一度</button>
+      <button class="back-top-btn" onclick="goExamSetup()">設定に戻る</button>
+    </div>
+  </div>
+</div>
+</div><!-- /pane-exam -->
+
+<footer>Viel Erfolg beim Lernen! 🇩🇪</footer>
+
+<script>
+// ================================================================
+//  ★★★ 単語集データ ★★★
+//
+//  【名詞の書き方】
+//  { de: "Tisch/e", jp: "机", gender: "der" }
+//   → de: 単語/複数形の語尾  jp: 日本語  gender: "der"/"die"/"das"
+//
+//  【名詞以外の書き方】
+//  { de: "früher", jp: "以前", gender: null }
+//   → gender: null にすると日本語→ドイツ語テキスト入力になります
+// ================================================================
+
+const WORD_SETS = {};
+
+// ---- No.10: 時間・日付 ----
+WORD_SETS[10] = {
+  label: "時間・日付",
+  words: [
+    { de: "früher",             jp: "以前",         gender: null },
+    { de: "später",             jp: "後で",     gender: null },
+    { de: "gestern",            jp: "昨日",         gender: null },
+    { de: "vorgestern",         jp: "一昨日",       gender: null },
+    { de: "morgen",             jp: "明日",         gender: null },
+    { de: "übermorgen",         jp: "明後日",       gender: null },
+    { de: "Vormittag/e",         jp: "午前",         gender: "der" },
+    { de: "Nachmittag/e",        jp: "午後",         gender: "der" },
+    { de: "Mittag/e",           jp: "昼、正午",     gender: "der" },
+    { de: "Abend/e",            jp: "夜",           gender: "der" },
+    { de: "Uhr",                jp: "…時",          gender: "die" },
+    { de: "Minute/n",           jp: "…分",          gender: "die" },
+    { de: "Stunde/n",           jp: "…時間",        gender: "die" },
+    { de: "Sekunde/n",          jp: "…秒",          gender: "die" },
+    { de: "…Uhr dreißig",       jp: "…時30分",        gender: null },
+    { de: "eine Viertelstunde", jp: "15分間",       gender: null },
+    { de: "sofort",             jp: "すぐに",       gender: null },
+    { de: "eine Weile",         jp: "しばらくの間", gender: null },
+    { de: "ewig",               jp: "永遠の",       gender: null },
+  ]
+};
+
+// ---- No.1: 指示語・方角 ----
+WORD_SETS[1] = {
+  label: "指示語・方角",
+  words: [
+    { de: "dies hier",       jp: "これ",     gender: null },
+    { de: "das dort",        jp: "それ",     gender: null },
+    { de: "das dort drüben",  jp: "あれ",     gender: null },
+    { de: "diese hier",      jp: "これら",   gender: null },
+    { de: "die dort",        jp: "それら",   gender: null },
+    { de: "die dort drüben", jp: "あれら",   gender: null },
+    { de: "dieser",          jp: "この",     gender: null },
+    { de: "dieser dort",     jp: "その",     gender: null },
+    { de: "der dort drüben", jp: "あの",     gender: null },
+    { de: "hier",            jp: "ここ",     gender: null },
+    { de: "dort",            jp: "あそこ",   gender: null },
+    { de: "rechts",          jp: "右",       gender: null },
+    { de: "links",           jp: "左",       gender: null },
+    { de: "oben",            jp: "上",       gender: null },
+    { de: "unten",           jp: "下",       gender: null },
+    { de: "vorne",           jp: "前",       gender: null },
+    { de: "hinten",          jp: "後ろ",     gender: null },
+    { de: "Norden",          jp: "北",       gender: "der" },
+    { de: "Süden",           jp: "南",       gender: "der" },
+    { de: "Osten",           jp: "東",       gender: "der" },
+    { de: "Westen",          jp: "西",       gender: "der" },
+  ]
+};
+
+// ---- No.4: 挨拶・日常表現 ----
+WORD_SETS[4] = {
+  label: "挨拶・日常表現",
+  words: [
+    { de: "Guten Morgen",        jp: "おはようございます",       gender: null },
+    { de: "Guten Tag",           jp: "こんにちは",               gender: null },
+    { de: "Guten Abend",         jp: "こんばんは",               gender: null },
+    { de: "Gute Nacht",          jp: "おやすみなさい",           gender: null },
+    { de: "Danke",               jp: "ありがとう",               gender: null },
+    { de: "Bitte sehr",          jp: "どういたしまして",         gender: null },
+    { de: "Auf Wiedersehen",     jp: "さようなら",               gender: null },
+    { de: "Tschüss",             jp: "じゃあね",                 gender: null },
+    { de: "Also dann",           jp: "またね",                   gender: null },
+    { de: "Viel Glück",          jp: "頑張って",                 gender: null },
+    { de: "Entschuldigung",      jp: "ごめんなさい",             gender: null },
+    { de: "Verzeihung",          jp: "失礼",                     gender: null },
+    { de: "Freut mich",          jp: "よろしく",                 gender: null },
+    { de: "Gern geschehen",      jp: "いいえ、どういたしまして", gender: null },
+    { de: "Lange nicht gesehen", jp: "お久しぶりです",           gender: null },
+    { de: "Das ist aber nett",   jp: "ご親切にどうも",           gender: null },
+    { de: "Merci",               jp: "（ラフに）ありがとう",     gender: null },
+    { de: "Schönes Wochenende",  jp: "よい週末を",               gender: null },
+    { de: "Danke, gleichfalls",  jp: "どうも、あなたもね",       gender: null },
+    { de: "Guten Appetit",       jp: "いただきます・召し上がれ（食前の挨拶）",             gender: null },
+  ]
+};
+
+// ---- No.7: 数字・数量表現 ----
+WORD_SETS[7] = {
+  label: "数字・数量表現",
+  words: [
+    { de: "hundert",                       jp: "100",               gender: null },
+    { de: "tausend",                       jp: "1000",              gender: null },
+    { de: "eine Million",                  jp: "1,000,000",         gender: null },
+    { de: "elf",                           jp: "11",                gender: null },
+    { de: "zwölf",                         jp: "12",                gender: null },
+    { de: "zwanzig",                       jp: "20",                gender: null },
+    { de: "sieben Millionen",              jp: "7,000,000",         gender: null },
+    { de: "eine Milliarde",                jp: "1,000,000,000",     gender: null },
+    { de: "hundert Milliarden",            jp: "100,000,000,000",   gender: null },
+    { de: "eine Billion",                  jp: "1,000,000,000,000", gender: null },
+    { de: "neunzehnhundertneunundneunzig", jp: "1999",              gender: null },
+  ]
+};
+
+// ---- No.8: 曜日・週・休日 ----
+WORD_SETS[8] = {
+  label: "曜日・週・休日",
+  words: [
+    { de: "Datum/Daten",    jp: "日付、データ",   gender: "das" },
+    { de: "der neunzehnte", jp: "（日付で）19日", gender: null  },
+    { de: "Jahr/e",         jp: "年",             gender: "das" },
+    { de: "Monat/e",        jp: "月",             gender: "der" },
+    { de: "Tag/e",          jp: "日",             gender: "der" },
+    { de: "Feiertag/e",     jp: "休日",           gender: "der" },
+    { de: "Geburtstag/e",   jp: "誕生日",         gender: "der" },
+    { de: "Woche/n",        jp: "週",             gender: "die" },
+    { de: "diese Woche",    jp: "今週",           gender: null  },
+    { de: "Wochentag/e",    jp: "曜日、平日",     gender: "der" },
+    { de: "Sonntag/e",        jp: "日曜日",         gender: "der" },
+    { de: "Montag/e",         jp: "月曜日",         gender: "der" },
+    { de: "Dienstag/e",       jp: "火曜日",         gender: "der" },
+    { de: "Mittwoch/e",     jp: "水曜日",         gender: "der" },
+    { de: "Donnerstag/e",     jp: "木曜日",         gender: "der" },
+    { de: "Freitag/e",        jp: "金曜日",         gender: "der" },
+    { de: "Samstag/e",        jp: "土曜日",         gender: "der" },
+    { de: "Wochenende/n",   jp: "週末",           gender: "das" },
+    { de: "Urlaubstag/e",   jp: "休暇日",         gender: "der" },
+  ]
+};
+
+// ---- No.9: 月・季節・祝日 ----
+WORD_SETS[9] = {
+  label: "月・季節・祝日",
+  words: [
+    { de: "Januar",            jp: "1月",          gender: null  },
+    { de: "Februar",           jp: "2月",          gender: null  },
+    { de: "März",              jp: "3月",          gender: null  },
+    { de: "April",             jp: "4月",          gender: null  },
+    { de: "Mai",               jp: "5月",          gender: null  },
+    { de: "Juni",              jp: "6月",          gender: null  },
+    { de: "Juli",              jp: "7月",          gender: null  },
+    { de: "August",            jp: "8月",          gender: null  },
+    { de: "September",         jp: "9月",          gender: null  },
+    { de: "Oktober",           jp: "10月",         gender: null  },
+    { de: "November",          jp: "11月",         gender: null  },
+    { de: "Dezember",          jp: "12月",         gender: null  },
+    { de: "Jahreszeit/en",     jp: "季節",         gender: "die" },
+    { de: "vier Jahreszeiten", jp: "四季",         gender: null  },
+    { de: "Frühling/e",        jp: "春",           gender: "der" },
+    { de: "Sommer",            jp: "夏",           gender: "der" },
+    { de: "Herbst/e",          jp: "秋",           gender: "der" },
+    { de: "Winter",            jp: "冬",           gender: "der" },
+    { de: "Heiligabend/e",     jp: "クリスマスイブ", gender: "der" },
+    { de: "Weihnachten",       jp: "クリスマス",   gender: "das" },
+    { de: "Silvester",         jp: "大晦日",       gender: "der" },
+    { de: "Neujahr",           jp: "新年、元旦",   gender: "das" },
+  ]
+};
+
+// ---- No.11: 天気・気候 ----
+WORD_SETS[11] = {
+  label: "天気・気候",
+  words: [
+    { de: "Klima",             jp: "気候",             gender: "das" },
+    { de: "Temperatur/en",     jp: "温度、気温",       gender: "die" },
+    { de: "Feuchtigkeit",      jp: "湿度",             gender: "die" },
+    { de: "Luftdruck",         jp: "気圧",             gender: "der" },
+    { de: "heiter",            jp: "晴れた、晴天の",   gender: null  },
+    { de: "Regen",             jp: "雨",               gender: "der" },
+    { de: "Wind/e",            jp: "風",               gender: "der" },
+    { de: "bedeckt",           jp: "曇りの",           gender: null  },
+    { de: "Schnee",            jp: "雪",               gender: "der" },
+    { de: "Gewitter",          jp: "雷雨",               gender: "das" },
+    { de: "Hagel",             jp: "あられ、ひょう",   gender: "der" },
+    { de: "Regenbogen",        jp: "虹",               gender: "der" },
+    { de: "Überschwemmung",    jp: "洪水",             gender: "die" },
+    { de: "Trockenheit",       jp: "乾燥していること", gender: "die" },
+    { de: "Eis",               jp: "氷",               gender: "das" },
+    { de: "kalt",              jp: "寒い",             gender: null  },
+    { de: "heiß",              jp: "暑い",             gender: null  },
+    { de: "warm",              jp: "暖かい",           gender: null  },
+    { de: "schwül",            jp: "蒸し暑い",         gender: null  },
+    { de: "Thermometer",       jp: "温度計",           gender: "das" },
+    { de: "...Grad",           jp: "…度",             gender: null  },
+  ]
+};
+
+// ---- No.12: 地理と宇宙 ----
+WORD_SETS[12] = {
+  label: "地理と宇宙",
+  words: [
+    { de: "Meer/e",            jp: "海",               gender: "das" },
+    { de: "Küste",             jp: "海岸",             gender: "die" },
+    { de: "Bucht",             jp: "湾、入り江",       gender: "die" },
+    { de: "Fluss/Flüsse",        jp: "川、河",           gender: "der" },
+    { de: "Insel",             jp: "島",               gender: "die" },
+    { de: "Halbinsel",         jp: "半島",             gender: "die" },
+    { de: "Wald/Wälder",       jp: "森",               gender: "der" },
+    { de: "Berg/e",            jp: "山",               gender: "der" },
+    { de: "Feld/er",           jp: "畑、野原",         gender: "das" },
+    { de: "Hügel",             jp: "丘",               gender: "der" },
+    { de: "Himmel",            jp: "空",               gender: "der" },
+    { de: "Wolke/n",           jp: "雲",               gender: "die" },
+    { de: "Stern/e",           jp: "星",               gender: "der" },
+    { de: "Mond/e",            jp: "月",               gender: "der" },
+    { de: "Sonne/n",           jp: "太陽",             gender: "die" },
+    { de: "Erde",              jp: "地球",             gender: "die" },
+    { de: "Planet/en",         jp: "惑星",             gender: "der" },
+    { de: "Fixstern/e",        jp: "恒星",             gender: "der" },
+    { de: "Weltall",           jp: "宇宙",             gender: "das" },
+    { de: "Komet/en",          jp: "彗星",             gender: "der" },
+    { de: "Milchstraße",       jp: "銀河",             gender: "die" },
+  ]
+};
+
+// ---- No.13: 人の一生（1） ----
+WORD_SETS[13] = {
+  label: "人の一生（1）",
+  words: [
+    { de: "Leben",          jp: "人生、命、生涯",               gender: "das" },
+    { de: "Geburt/en",      jp: "誕生",                         gender: "die" },
+    { de: "Säugling/e",     jp: "赤ん坊",                       gender: "der" },
+    { de: "Taufe/n",        jp: "洗礼",                         gender: "die" },
+    { de: "Kindheit",       jp: "幼年期",                       gender: "die" },
+    { de: "Kind/er",        jp: "子ども",                         gender: "das" },
+    { de: "Jugendliche/n",  jp: "少女（14歳以上18歳未満）",     gender: "die" },
+    { de: "Jugendliche/n",  jp: "少年（14歳以上18歳未満）",     gender: "der" },
+    { de: "Jugend",         jp: "青年期",                       gender: "die" },
+    { de: "Mädchen",        jp: "少女",                         gender: "das" },
+    { de: "Junge/n",        jp: "少年",                         gender: "der" },
+    { de: "Erwachsene/n",    jp: "大人、成人",                   gender: "der" },
+    { de: "Liebe/n",        jp: "恋愛、恋",                     gender: "die" },
+    { de: "ledig",          jp: "独身の",                       gender: null  },
+    { de: "verlobt",        jp: "婚約した",                     gender: null  },
+    { de: "verheiratet",    jp: "既婚の",                       gender: null  },
+    { de: "geschieden",     jp: "離婚した",                     gender: null  },
+    { de: "Braut/Bräute",   jp: "新婦、お嫁さん",               gender: "die" },
+    { de: "Bräutigam/e",    jp: "新郎、お婿さん",               gender: "der" },
+    { de: "Verliebte",      jp: "恋をしている人たち",                     gender: null  },
+    { de: "Verlobung/en",   jp: "婚約",                         gender: "die" },
+    { de: "Hochzeit/en",    jp: "結婚式",                       gender: "die" },
+  ]
+};
+
+// ---- No.14: 人の一生（2） ----
+WORD_SETS[14] = {
+  label: "人の一生（2）",
+  words: [
+    { de: "Ehe/n",              jp: "結婚生活",   gender: "die" },
+    { de: "Schwangerschaft/en", jp: "妊娠",       gender: "die" },
+    { de: "Geburt/en",          jp: "出産",       gender: "die" },
+    { de: "Hochzeitstag/e",     jp: "結婚記念日", gender: "der" },
+    { de: "Jubiläum/Jubiläen",  jp: "記念日",     gender: "das" },
+    { de: "Scheidung/en",       jp: "離婚",       gender: "die" },
+    { de: "Pensionierung/en",   jp: "定年",       gender: "die" },
+    { de: "Greis/e",            jp: "老人（男）", gender: "der" },
+    { de: "Greisin/nen",        jp: "老人（女）", gender: "die" },
+    { de: "Falten",             jp: "しわ",       gender: null  },
+    { de: "graue Haare",        jp: "白髪",       gender: null  },
+    { de: "Tod",                jp: "死",         gender: "der" },
+    { de: "Totenwache/n",       jp: "通夜",       gender: "die" },
+    { de: "Beisetzung/en",      jp: "葬式",       gender: "die" },
+    { de: "Grab/Gräber",        jp: "墓",         gender: "das" },
+    { de: "Verstorbene",        jp: "故人",       gender: null  },
+    { de: "Testament/e",        jp: "遺言",       gender: "das" },
+    { de: "Nachruf/e",          jp: "追悼文",     gender: "der" },
+  ]
+};
+
+// ---- No.15: 身体・体の反応 ----
+WORD_SETS[15] = {
+  label: "身体・体の反応",
+  words: [
+    { de: "Körper",        jp: "体",                 gender: "der" },
+    { de: "Herz/en",       jp: "心臓",               gender: "das" },
+    { de: "Lunge/n",       jp: "肺",                 gender: "die" },
+    { de: "Magen/Mägen",   jp: "胃",                 gender: "der" },
+    { de: "Darm/Därme",    jp: "腸",                 gender: "der" },
+    { de: "Knochen",       jp: "骨",                 gender: "der" },
+    { de: "Blut",          jp: "血",                 gender: "das" },
+    { de: "Haut/Häute",    jp: "皮膚",               gender: "die" },
+    { de: "Träne/n",       jp: "涙",                 gender: "die" },
+    { de: "Speichel",      jp: "唾液",               gender: "der" },
+    { de: "Schweiß",       jp: "汗",                 gender: "der" },
+    { de: "Urin",          jp: "尿",                 gender: "der" },
+    { de: "Stuhl/Stühle",  jp: "大便",               gender: "der" },
+    { de: "Furz/Fürze",    jp: "屁、つまらないこと", gender: "der" },
+    { de: "husten",        jp: "咳をする",           gender: null  },
+    { de: "schnarchen",    jp: "いびきをかく",       gender: null  },
+    { de: "gähnen",        jp: "あくびをする",       gender: null  },
+    { de: "Schluckauf",    jp: "しゃっくり",         gender: "der" },
+    { de: "aufstoßen",     jp: "げっぷをする",       gender: null  },
+    { de: "niesen",        jp: "くしゃみをする",     gender: null  },
+  ]
+};
+
+// ---- No.18: いつもの動作 ----
+WORD_SETS[18] = {
+  label: "いつもの動作",
+  words: [
+    { de: "sehen",       jp: "見る",         gender: null },
+    { de: "hören",       jp: "聞く",         gender: null },
+    { de: "sprechen",    jp: "話す",         gender: null },
+    { de: "lesen",       jp: "読む",         gender: null },
+    { de: "schreiben",   jp: "書く",         gender: null },
+    { de: "sitzen",      jp: "座る",         gender: null },
+    { de: "gehen",       jp: "行く、歩く",   gender: null },
+    { de: "kommen",      jp: "来る",         gender: null },
+    { de: "nehmen",      jp: "取る",         gender: null },
+    { de: "essen",       jp: "食べる",       gender: null },
+    { de: "trinken",     jp: "飲む",         gender: null },
+    { de: "haben",       jp: "持つ",         gender: null },
+    { de: "geben",       jp: "与える",       gender: null },
+    { de: "bekommen",    jp: "受け取る",     gender: null },
+    { de: "eintreten",   jp: "入る",         gender: null },
+    { de: "hinausgehen", jp: "外へ出る",     gender: null },
+    { de: "singen",      jp: "歌う",         gender: null },
+    { de: "spielen",     jp: "遊ぶ",         gender: null },
+    { de: "laufen",      jp: "走る",         gender: null },
+    { de: "springen",    jp: "跳ぶ、跳ねる", gender: null },
+    { de: "sich ausruhen",    jp: "休む",         gender: null },
+  ]
+};
+
+// ---- No.19: 一日の生活 ----
+WORD_SETS[19] = {
+  label: "一日の生活",
+  words: [
+    { de: "aufstehen",             jp: "起きる",         gender: null },
+    { de: "sich waschen",          jp: "体を洗う",       gender: null },
+    { de: "sich die Zähne putzen", jp: "歯を磨く",       gender: null },
+    { de: "frühstücken",           jp: "朝食をとる",     gender: null },
+    { de: "Zeitung lesen",         jp: "新聞を読む",     gender: null },
+    { de: "zur Toilette gehen",    jp: "トイレに行く",   gender: null },
+    { de: "sich umziehen",         jp: "着替える",       gender: null },
+    { de: "Nachrichten hören",     jp: "ニュースを聞く", gender: null },
+    { de: "sich zurechtmachen",    jp: "身支度をする",   gender: null },
+    { de: "mit dem Wagen fahren",  jp: "車に乗る",       gender: null },
+    { de: "aus dem Wagen steigen", jp: "車を降りる",     gender: null },
+    { de: "einkaufen",             jp: "買い物をする",   gender: null },
+    { de: "arbeiten",              jp: "働く",           gender: null },
+    { de: "zu Mittag essen",       jp: "昼食をとる",     gender: null },
+    { de: "eine Pause einlegen",   jp: "ひと休みする",   gender: null },
+    { de: "Feierabend machen",     jp: "仕事を終える",   gender: null },
+    { de: "ausspannen",            jp: "リラックスする", gender: null },
+    { de: "zu Abend essen",        jp: "夕食を食べる",   gender: null },
+    { de: "spazieren gehen",       jp: "散歩する",       gender: null },
+    { de: "schlafen",              jp: "寝る",           gender: null },
+    { de: "träumen",               jp: "夢をみる",       gender: null },
+  ]
+};
+
+WORD_SETS[20] = {
+  label: "感覚・五感",
+  words: [
+    { de: "Empfindung/en", jp: "感覚、感情", gender: "die" },
+    { de: "Gefühl/e", jp: "感情、感触", gender: "das" },
+    { de: "Beobachtung/en", jp: "観察、監視", gender: "die" },
+    { de: "Sinnesorgan/e", jp: "感覚器官", gender: "das" },
+    { de: "Gehör/e", jp: "聴覚", gender: "das" },
+    { de: "Ton/Töne", jp: "音", gender: "der" },
+    { de: "Kälte", jp: "寒さ", gender: "die" },
+    { de: "Wärme/n", jp: "暖かさ、（雰囲気を含む）", gender: "die" },
+    { de: "Hitze", jp: "暑さ、熱さ", gender: "die" },
+    { de: "Geschmack/Geschmäcker", jp: "味覚", gender: "der" },
+    { de: "angenehm", jp: "快適な", gender: null },
+    { de: "unangenehm", jp: "不快な", gender: null },
+    { de: "schmerzhaft", jp: "痛い", gender: null },
+    { de: "spürbar", jp: "感じられる", gender: null },
+    { de: "Geruch/Gerüche", jp: "嗅覚、におい", gender: "der" },
+    { de: "Gestank", jp: "悪臭", gender: "der" },
+    { de: "Sehen", jp: "見ること", gender: "das" },
+    { de: "Sehkraft", jp: "視力", gender: "die" },
+    { de: "Helligkeit/en", jp: "明るさ", gender: "die" },
+    { de: "Dunkelheit/en", jp: "暗さ、闇", gender: "die" },
+    { de: "wahrnehmbar", jp: "知覚されうる", gender: null },
+  ]
+};
+
+WORD_SETS[21] = {
+  label: "健康・病気・薬",
+  words: [
+    { de: "Wohlbefinden", jp: "健康", gender: "das" },
+    { de: "Erkrankung/en", jp: "病気", gender: "die" },
+    { de: "Blutdruck", jp: "血圧", gender: "der" },
+    { de: "Apotheke/n", jp: "薬局", gender: "die" },
+    { de: "Drogerie/n", jp: "ドラッグストア", gender: "die" },
+    { de: "Medizin/en", jp: "医学、薬", gender: "die" },
+    { de: "Pille/n", jp: "錠剤", gender: "die" },
+    { de: "Nachtdienst", jp: "夜間勤務", gender: "der" },
+    { de: "Erkältung/en", jp: "風邪", gender: "die" },
+    { de: "Magenbeschwerden", jp: "胃痛、胃の不調（複数形のみ）", gender: "die" },
+    { de: "Anfall/Anfälle", jp: "発作", gender: "der" },
+    { de: "Asthma", jp: "喘息", gender: "das" },
+    { de: "Allergie/n", jp: "アレルギー", gender: "die" },
+    { de: "kritisch", jp: "危険な、批判的な", gender: null },
+    { de: "Wunde/n", jp: "傷", gender: "die" },
+    { de: "Krankenversicherung", jp: "健康保険", gender: "die" },
+    { de: "einnehmen", jp: "（薬を）服用する", gender: null },
+    { de: "schlucken", jp: "（薬を）飲む", gender: null },
+    { de: "wirken", jp: "作用する", gender: null },
+    { de: "Salbe/n", jp: "軟膏", gender: "die" },
+    { de: "Pflaster", jp: "絆創膏、舗道", gender: "das" },
+  ]
+};
+
+WORD_SETS[22] = {
+  label: "病院・医者",
+  words: [
+    { de: "Krankenhaus/Krankenhäuser", jp: "病院", gender: "das" },
+    { de: "Arzt/Ärzte", jp: "医者", gender: "der" },
+    { de: "Ärztin/Ärztinnen", jp: "女性の医者", gender: "die" },
+    { de: "Internist/en", jp: "内科医", gender: "der" },
+    { de: "Chirurg/en", jp: "外科医", gender: "der" },
+    { de: "Hals-Nasen-Ohren-Arzt/-Ärzte", jp: "耳鼻咽喉科医", gender: "der" },
+    { de: "Kinderarzt/Kinderärzte", jp: "小児科医", gender: "der" },
+    { de: "Gynäkologe/n", jp: "婦人科医（女性形は Gynäkologin）", gender: "der" },
+    { de: "Untersuchung/en", jp: "診察、検査、調査", gender: "die" },
+    { de: "Krankenbesuch/e", jp: "病人の見舞い、往診", gender: "der" },
+    { de: "Krankenwagen", jp: "救急車", gender: "der" },
+    { de: "Operation/en", jp: "手術、軍事作戦", gender: "die" },
+    { de: "Augenarzt/Augenärzte", jp: "眼科医", gender: "der" },
+    { de: "kurzsichtig", jp: "近視の", gender: null },
+    { de: "Zahnarzt/Zahnärzte", jp: "歯科医", gender: "der" },
+    { de: "ein kranker Zahn", jp: "虫歯（病んだ歯）", gender: null },
+    { de: "Extraktion/en", jp: "抜歯、抽出", gender: "die" },
+    { de: "Rezept/e", jp: "処方箋", gender: "das" },
+    { de: "Überarbeitung/en", jp: "改訂、過労", gender: "die" },
+    { de: "Schlaf", jp: "睡眠", gender: "der" },
+    { de: "Ernährung/en", jp: "栄養", gender: "die" },
+    { de: "Diät/en", jp: "食事療法、ダイエット", gender: "die" },
+  ]
+};
+
+WORD_SETS[23] = {
+  label: "性格・人柄",
+  words: [
+    { de: "Charakter/e", jp: "性格", gender: "der" },
+    { de: "Höflichkeit/en", jp: "礼儀正しさ", gender: "die" },
+    { de: "Geduld", jp: "忍耐", gender: "die" },
+    { de: "Güte", jp: "思いやり、親切", gender: "die" },
+    { de: "Mitgefühl", jp: "同情", gender: "das" },
+    { de: "Talent/e", jp: "才能", gender: "das" },
+    { de: "Zurückhaltung", jp: "遠慮", gender: "die" },
+    { de: "tüchtig", jp: "有能な、立派な", gender: null },
+    { de: "Freundlichkeit/en", jp: "親切、好意", gender: "die" },
+    { de: "vernünftig", jp: "賢明な、理性的な", gender: null },
+    { de: "offen", jp: "率直な、開放的な、開いている", gender: null },
+    { de: "bescheiden", jp: "控えめな", gender: null },
+    { de: "großzügig", jp: "気前の良い", gender: null },
+    { de: "anständig", jp: "礼儀正しい", gender: null },
+    { de: "geistreich", jp: "才気に満ちた", gender: null },
+    { de: "Rücksicht nehmen", jp: "他人を考慮する", gender: null },
+    { de: "zuverlässig", jp: "信用できる", gender: null },
+    { de: "mutig", jp: "勇気のある", gender: null },
+    { de: "umsichtig", jp: "慎重な", gender: null },
+    { de: "Sparsamkeit", jp: "倹約", gender: "die" },
+    { de: "Intelligenz/en", jp: "知能", gender: "die" },
+  ]
+};
+
+// ================================================================
+//  システムコード
+// ================================================================
+
+let selectedSets = new Set();
+let questions = [], current = 0, score = 0;
+let wrongAnswers = [], lastSets = null;
+
+// 現在の問題の状態
+let articleCorrect = false;   // ステップ1の結果
+let chosenArticle  = '';      // ユーザーが選んだ定冠詞
+
+function init() {
+  const grid = document.getElementById('set-grid');
+  grid.innerHTML = '';
+  Object.keys(WORD_SETS).map(Number).sort((a,b)=>a-b).forEach(num => {
+    const s = WORD_SETS[num];
+    const el = document.createElement('div');
+    el.className = 'set-card';
+    el.id = 'sc-' + num;
+    el.onclick = () => toggleSet(num);
+    el.innerHTML = `<span class="ckmark">✓</span>
+      <span class="snum">${num}</span>
+      <span class="slabel">${s.label}</span>
+      <span class="scount">${s.words.length}語</span>`;
+    grid.appendChild(el);
+  });
+  updateSummary();
+}
+
+function toggleSet(n) {
+  selectedSets.has(n) ? selectedSets.delete(n) : selectedSets.add(n);
+  document.getElementById('sc-'+n).classList.toggle('selected', selectedSets.has(n));
+  updateSummary();
+}
+function selectAll()  { Object.keys(WORD_SETS).map(Number).forEach(n => { selectedSets.add(n); document.getElementById('sc-'+n).classList.add('selected'); }); updateSummary(); }
+function selectNone() { selectedSets.forEach(n => { const e=document.getElementById('sc-'+n); if(e) e.classList.remove('selected'); }); selectedSets.clear(); updateSummary(); }
+
+function updateSummary() {
+  updateReviewBtn();
+  const btn = document.getElementById('start-btn');
+  const txt = document.getElementById('sum-text');
+  if (!selectedSets.size) { txt.innerHTML='単語集を選択してください'; btn.disabled=true; return; }
+  const sorted = [...selectedSets].sort((a,b)=>a-b);
+  let total = 0;
+  sorted.forEach(n => total += WORD_SETS[n].words.length);
+  txt.innerHTML = `単語集 <b>${sorted.join('・')}</b> ／ <b>${total}問</b>`;
+  btn.disabled = false;
+}
+
+function startQuiz() {
+  lastSets = new Set(selectedSets);
+  let pool = [];
+  [...selectedSets].sort((a,b)=>a-b).forEach(n =>
+    pool = pool.concat(WORD_SETS[n].words.map(w => ({...w, setNum:n}))));
+  pool = thinKnown(pool); reviewMode = false; skipped = 0;
+  questions = shuffle(pool);
+  current = 0; score = 0; wrongAnswers = [];
+
+  const sorted = [...selectedSets].sort((a,b)=>a-b);
+  document.getElementById('set-tags').innerHTML =
+    sorted.map(n=>`<span class="set-tag">No.${n} ${WORD_SETS[n].label}</span>`).join('');
+
+  show('quiz-area');
+  showQ();
+}
+
+function showQ() {
+  const q = questions[current];
+  const total = questions.length;
+  document.getElementById('q-num').textContent = current+1;
+  document.getElementById('q-tot').textContent = total;
+  document.getElementById('score-now').textContent = score;
+  document.getElementById('prog-bar').style.width = (current/total*100)+'%';
+  document.getElementById('q-badge').textContent = `No.${q.setNum} ${WORD_SETS[q.setNum].label}`;
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('answer-reveal').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+  document.getElementById('skip-btn').style.display = 'inline-block';
+
+  // 全パネル非表示
+  ['step-article','step-word','step-other'].forEach(id =>
+    document.getElementById(id).style.display = 'none');
+
+  articleCorrect = false;
+  chosenArticle = '';
+
+  if (q.gender) {
+    // 名詞: ステップ1へ
+    document.getElementById('q-label').textContent = '① 定冠詞を選んでください';
+    document.getElementById('q-word').textContent = q.jp;
+    document.getElementById('q-sub').textContent = '';
+    document.querySelectorAll('.art-btn').forEach(b => { b.className='art-btn'; b.disabled=false; });
+    document.getElementById('step-article').style.display = 'block';
+  } else {
+    // 名詞以外
+    document.getElementById('q-label').textContent = 'ドイツ語を入力してください';
+    document.getElementById('q-word').textContent = q.jp;
+    document.getElementById('q-sub').textContent = '';
+    const inp = document.getElementById('other-input');
+    inp.value=''; inp.className='ans-input'; inp.disabled=false;
+    document.getElementById('step-other').style.display = 'block';
+    setTimeout(()=>inp.focus(), 50);
+  }
+}
+
+// ── 名詞ステップ1: 定冠詞 ──
+function answerArticle(selected) {
+  const q = questions[current];
+  chosenArticle = selected;
+  document.getElementById('skip-btn').style.display = 'none';
+  articleCorrect = (selected === q.gender);
+
+  document.querySelectorAll('.art-btn').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === q.gender) b.classList.add('reveal');
+    if (b.textContent === selected) b.classList.add(articleCorrect ? 'correct' : 'wrong');
+  });
+
+  // ステップ2へ自動遷移（少し待つ）
+  setTimeout(() => {
+    document.getElementById('step-article').style.display = 'none';
+    document.getElementById('q-label').textContent = '② 単語（複数形）を入力してください';
+
+    const label = document.getElementById('article-result-label');
+    if (articleCorrect) {
+      label.innerHTML = `<span style="color:var(--correct)">✓ ${q.gender}</span> は正解！　次は単語を入力`;
+    } else {
+      label.innerHTML = `<span style="color:var(--wrong)">✗ ${selected}</span>　正解は <span style="color:var(--correct)">${q.gender}</span>　続けて単語を入力`;
+    }
+
+    const inp = document.getElementById('word-input');
+    inp.value=''; inp.className='ans-input'; inp.disabled=false;
+    document.getElementById('step-word').style.display = 'block';
+    setTimeout(()=>inp.focus(), 50);
+  }, 700);
+}
+
+// ── 名詞ステップ2: 単語入力 ──
+function checkWord() {
+  const q = questions[current];
+  const inp = document.getElementById('word-input');
+  const userRaw = inp.value.trim();
+  if (!userRaw) return;
+
+  inp.disabled = true;
+  const norm = normDe;
+  const wordCorrect = norm(userRaw) === norm(q.de);
+
+  // 正解判定: 両ステップ正解のみ◯
+  const fullyCorrect = articleCorrect && wordCorrect;
+
+  if (fullyCorrect) {
+    score++; recordResult(q,true);
+    document.getElementById('score-now').textContent = score;
+    inp.classList.add('correct');
+    showFeedback('correct', `完璧！ ${q.gender} ${q.de} ＝ ${q.jp}`);
+  } else {
+    inp.classList.add('wrong');
+    const parts = [];
+    if (!articleCorrect) parts.push(`定冠詞: ${chosenArticle} → 正解 ${q.gender}`);
+    if (!wordCorrect) parts.push(`単語: ${userRaw} → 正解 ${q.de}`);
+    recordResult(q,false); wrongAnswers.push({ q, articleOk: articleCorrect, wordOk: wordCorrect,
+      userArticle: chosenArticle, userWord: userRaw });
+    showFeedback('wrong', `不正解。 ` + parts.join('　'));
+    document.getElementById('answer-reveal').textContent = `正解: ${q.gender} ${q.de}`;
+    document.getElementById('answer-reveal').style.display = 'block';
+  }
+
+  document.getElementById('next-btn').style.display = 'block';
+  document.getElementById('skip-btn').style.display = 'none';
+}
+
+// ── 名詞以外 ──
+function checkOther() {
+  const q = questions[current];
+  const inp = document.getElementById('other-input');
+  const userRaw = inp.value.trim();
+  if (!userRaw) return;
+
+  inp.disabled = true;
+  const norm = s => normDe(s.replace(/^(der|die|das)\s+/i,''));
+  const ok = norm(userRaw) === norm(q.de);
+
+  if (ok) {
+    score++; recordResult(q,true);
+    document.getElementById('score-now').textContent = score;
+    inp.classList.add('correct');
+    showFeedback('correct', `正解！ ${q.de} ＝ ${q.jp}`);
+  } else {
+    inp.classList.add('wrong');
+    recordResult(q,false); wrongAnswers.push({ q, articleOk: true, wordOk: false,
+      userArticle: '', userWord: userRaw });
+    showFeedback('wrong', `不正解。正解は「${q.de}」`);
+    document.getElementById('answer-reveal').textContent = `正解: ${q.de}`;
+    document.getElementById('answer-reveal').style.display = 'block';
+  }
+
+  document.getElementById('next-btn').style.display = 'block';
+  document.getElementById('skip-btn').style.display = 'none';
+}
+
+// Enterキー対応
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (currentTab === 'normal') {
+    const ws = document.getElementById('step-word');
+    const os = document.getElementById('step-other');
+    const nb = document.getElementById('next-btn');
+    if (ws.style.display !== 'none' && !document.getElementById('word-input').disabled) checkWord();
+    else if (os.style.display !== 'none' && !document.getElementById('other-input').disabled) checkOther();
+    else if (nb.style.display !== 'none') nextQ();
+  }
+});
+
+function showFeedback(type, msg) {
+  const el = document.getElementById('feedback');
+  el.textContent = msg;
+  el.className = 'feedback ' + type;
+  el.style.display = 'block';
+}
+
+function nextQ() {
+  if (++current >= questions.length) showResult();
+  else showQ();
+}
+
+// ── 結果 ──
+function showResult() {
+  show('result-area');
+  const total = questions.length - skipped;
+  document.getElementById('res-score').innerHTML = score + '<span>/' + total + '</span>';
+  const pct = total ? Math.round(score/total*100) : 100;
+  document.getElementById('res-msg').textContent =
+    (pct===100 ? '🎉 パーフェクト！' : pct>=80 ? '✨ よくできました！' : pct>=60 ? '📖 もう少し！' : '💪 復習してもう一度！')
+    + ` (${pct}%)`;
+
+  if (skipped) document.getElementById('res-msg').textContent += ` ／ 既知スキップ ${skipped}語`;
+  const wl = document.getElementById('wrong-list');
+  if (!wrongAnswers.length) { wl.innerHTML=''; return; }
+  wl.innerHTML = '<div class="wl-title">間違えた単語</div>' +
+    wrongAnswers.map(w => {
+      const isNoun = w.q.gender !== null;
+      const qText = w.q.jp;
+      let detail = '';
+      if (isNoun) {
+        if (!w.articleOk) detail += `<span style="color:var(--wrong)">定冠詞×</span> `;
+        if (!w.wordOk)    detail += `<span style="color:var(--wrong)">単語×</span>`;
+      } else {
+        detail = `<span style="color:var(--wrong)">${w.userWord}</span>`;
+      }
+      return `<div class="wrong-item">
+        <div><div class="wi-q">${qText}</div><div style="font-size:0.72rem;color:var(--muted)">No.${w.q.setNum}</div></div>
+        <div class="wi-right">
+          <div class="wi-correct">${isNoun ? w.q.gender+' ' : ''}${w.q.de}</div>
+          <div class="wi-user">${detail}</div>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+function restartSame() { if (reviewMode) { startReview(); return; } selectedSets = new Set(lastSets); startQuiz(); }
+function goSetup() {
+  show('setup-area');
+  Object.keys(WORD_SETS).map(Number).forEach(n => {
+    const e = document.getElementById('sc-'+n);
+    if(e) e.classList.toggle('selected', selectedSets.has(n));
+  });
+  updateSummary();
+}
+
+function show(id) {
+  ['setup-area','quiz-area','result-area'].forEach(i =>
+    document.getElementById(i).style.display = i===id ? 'block' : 'none');
+  const bar = document.getElementById('main-tab-bar');
+  bar.style.display = (id === 'setup-area') ? 'flex' : 'none';
+}
+function shuffle(a) {
+  const arr=[...a];
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+  return arr;
+}
+
+// ================================================================
+//  学習記録（localStorage）・復習・既知スキップ
+// ================================================================
+const REC_KEY = 'dowa_records_v1';
+let reviewMode = false, skipped = 0;
+const normDe = s => s.toLowerCase().replace(/\.\.\.|…/g,'').replace(/ß/g,'ss')
+  .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/\s+/g,' ').trim();
+const ymd = dt => dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+const today = () => ymd(new Date());
+const wkey = w => w.setNum+'|'+w.de+'|'+w.jp;
+function loadRec() {
+  try { const d = JSON.parse(localStorage.getItem(REC_KEY)); if (d && d.words && d.days) return d; } catch(_) {}
+  return { words:{}, days:{} };
+}
+function saveRec(d) { try { localStorage.setItem(REC_KEY, JSON.stringify(d)); } catch(_) {} }
+function wrec(d, q) { return d.words[wkey(q)] || (d.words[wkey(q)] = { ok:0, ng:0, known:false, lastWrong:false }); }
+function recordResult(q, ok) {
+  const d = loadRec(), r = wrec(d, q), t = d.days[today()] || (d.days[today()] = { n:0, ok:0 });
+  if (ok) { r.ok++; r.lastWrong = false; } else { r.ng++; r.lastWrong = true; r.known = false; }
+  r.last = today(); t.n++; if (ok) t.ok++;
+  saveRec(d);
+}
+function thinKnown(pool) {
+  const d = loadRec();
+  const f = pool.filter(w => { const r = d.words[wkey(w)]; return !(r && r.known) || Math.random() < 0.25; });
+  return f.length ? f : pool;
+}
+function skipQ() {
+  const q = questions[current], d = loadRec();
+  wrec(d, q).known = true; saveRec(d); skipped++;
+  document.getElementById('skip-btn').style.display = 'none';
+  ['step-article','step-word','step-other'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('q-label').textContent = '答えの確認（既知として記録しました）';
+  showFeedback('correct', `${q.gender ? q.gender+' ' : ''}${q.de} ＝ ${q.jp}`);
+  document.getElementById('next-btn').style.display = 'block';
+}
+function reviewWords() {
+  const d = loadRec(), out = [];
+  Object.keys(WORD_SETS).map(Number).sort((a,b)=>a-b).forEach(n => WORD_SETS[n].words.forEach(w => {
+    const r = d.words[n+'|'+w.de+'|'+w.jp]; if (r && r.lastWrong) out.push({ ...w, setNum:n });
+  }));
+  return out;
+}
+function updateReviewBtn() {
+  const b = document.getElementById('review-btn'); if (!b) return;
+  const n = reviewWords().length;
+  b.textContent = `🔁 間違えた単語を復習（${n}語）`; b.disabled = !n;
+}
+function startReview() {
+  const pool = reviewWords();
+  if (!pool.length) { alert('復習する単語はありません'); goSetup(); return; }
+  reviewMode = true; skipped = 0; current = 0; score = 0; wrongAnswers = [];
+  questions = shuffle(pool);
+  document.getElementById('set-tags').innerHTML = '<span class="set-tag">復習モード（間違えた単語）</span>';
+  show('quiz-area'); showQ();
+}
+function toggleStats() {
+  const p = document.getElementById('stats-panel');
+  if (p.style.display === 'none') { renderStats(); p.style.display = 'block'; } else p.style.display = 'none';
+}
+function renderStats() {
+  const d = loadRec(), pc = (a,b) => b ? Math.round(a/b*100)+'%' : '-';
+  let n = 0, ok = 0; Object.values(d.days).forEach(v => { n += v.n; ok += v.ok; });
+  const t = d.days[today()] || { n:0, ok:0 };
+  let h = `<div class="stat-box"><b>今日</b> ${t.n}問／正解${t.ok}（${pc(t.ok,t.n)}）<br><b>累計</b> ${n}問／正解${ok}（${pc(ok,n)}）</div><div class="stat-h">直近7日</div>`;
+  for (let i = 0; i < 7; i++) {
+    const dt = new Date(); dt.setDate(dt.getDate()-i); const k = ymd(dt), v = d.days[k] || { n:0, ok:0 };
+    h += `<div class="stat-row"><span>${k}</span><span>${v.n}問／正解${v.ok}（${pc(v.ok,v.n)}）</span></div>`;
+  }
+  h += '<div class="stat-h">単語集ごと</div>';
+  Object.keys(WORD_SETS).map(Number).sort((a,b)=>a-b).forEach(s => {
+    let st = 0, kn = 0, o = 0, g = 0;
+    WORD_SETS[s].words.forEach(w => { const r = d.words[s+'|'+w.de+'|'+w.jp]; if (r) { st++; o += r.ok; g += r.ng; if (r.known) kn++; } });
+    h += `<div class="stat-row"><span>No.${s} ${WORD_SETS[s].label}</span><span>学習${st}/${WORD_SETS[s].words.length}語・既知${kn}・正答率${pc(o,o+g)}</span></div>`;
+  });
+  const weak = [];
+  Object.keys(WORD_SETS).map(Number).forEach(s => WORD_SETS[s].words.forEach(w => {
+    const r = d.words[s+'|'+w.de+'|'+w.jp]; if (r && r.ng) weak.push({ w, r });
+  }));
+  weak.sort((a,b) => b.r.ng - a.r.ng);
+  h += '<div class="stat-h">苦手な単語（上位10）</div>' + (weak.slice(0,10).map(x =>
+    `<div class="stat-row"><span>${x.w.gender ? x.w.gender+' ' : ''}${x.w.de}（${x.w.jp}）</span><span>不正解${x.r.ng}／正解${x.r.ok}</span></div>`).join('') || '<div class="stat-row">まだありません</div>');
+  h += `<div class="stat-btns"><button class="ctrl-btn" onclick="exportRec()">記録を書き出す</button>
+    <button class="ctrl-btn" onclick="document.getElementById('rec-file').click()">記録を読み込む</button>
+    <button class="ctrl-btn" onclick="resetRec()">記録をリセット</button>
+    <input type="file" id="rec-file" accept=".json" style="display:none" onchange="importRec(event)"></div>`;
+  document.getElementById('stats-panel').innerHTML = h;
+}
+function exportRec() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(loadRec())], { type:'application/json' }));
+  a.download = 'dowa-records-'+today()+'.json'; a.click();
+}
+function importRec(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => { try {
+    const d = JSON.parse(r.result); if (!d.words || !d.days) throw 0;
+    if (confirm('現在の記録を、読み込んだ記録で置き換えます。よろしいですか？')) { saveRec(d); renderStats(); updateReviewBtn(); }
+  } catch(_) { alert('記録ファイルを読み込めませんでした'); } };
+  r.readAsText(f); e.target.value = '';
+}
+function resetRec() {
+  if (confirm('学習記録をすべて消去します。よろしいですか？')) { saveRec({ words:{}, days:{} }); renderStats(); updateReviewBtn(); }
+}
+
+init();
+
+// ================================================================
+//  ★★★ 期末2-1対策 単語データ ★★★
+// ================================================================
+const EXAM_WORDS = [
+  // 趣味・活動（動詞フレーズ）
+  { de: "Gitarre spielen",       jp: "ギターを弾く",     gender: null },
+  { de: "Rad fahren",            jp: "自転車に乗る",     gender: null },
+  { de: "malen",                 jp: "絵を描く",         gender: null },
+  { de: "Ski fahren",            jp: "スキーをする",     gender: null },
+  { de: "fernsehen",             jp: "テレビを見る",     gender: null },
+  { de: "reisen",                jp: "旅行する",         gender: null },
+  { de: "kochen",                jp: "料理する",         gender: null },
+  { de: "Freunde treffen",       jp: "友達に会う",       gender: null },
+  // 頻度副詞
+  { de: "immer",                 jp: "いつも",           gender: null },
+  { de: "sehr oft",              jp: "とても頻繁に",     gender: null },
+  { de: "oft",                   jp: "よく、しばしば",   gender: null },
+  { de: "manchmal",              jp: "時々",             gender: null },
+  { de: "fast nie",              jp: "ほとんどない",     gender: null },
+  { de: "nie",                   jp: "決して〜ない",     gender: null },
+  { de: "jedes Wochenende",      jp: "毎週末",           gender: null },
+  { de: "einmal in der Woche",   jp: "週に一度",         gender: null },
+  { de: "einmal pro Woche",      jp: "週に一度",         gender: null },
+  { de: "zweimal im Monat",      jp: "月に二度",         gender: null },
+  { de: "zweimal pro Monat",     jp: "月に二度",         gender: null },
+  { de: "am Wochenende",         jp: "週末に",           gender: null },
+  // 動詞・その他
+  { de: "wissen",                jp: "知っている",       gender: null },
+  { de: "genau",                 jp: "正確に、まさに",   gender: null },
+  { de: "fragen",                jp: "質問する",         gender: null },
+  { de: "im Garten",             jp: "庭で",             gender: null },
+  { de: "jedes Jahr",            jp: "毎年",             gender: null },
+  { de: "im Sommer",             jp: "夏に",             gender: null },
+  { de: "gespannt",              jp: "わくわくした",     gender: null },
+  { de: "allein",                jp: "一人で",           gender: null },
+  { de: "ein bisschen",          jp: "少し",             gender: null },
+  { de: "spät",                  jp: "遅く",             gender: null },
+  { de: "nach Hause",            jp: "家へ（帰る方向）", gender: null },
+  { de: "zu Hause",              jp: "家で（在宅）",     gender: null },
+  { de: "tragen",                jp: "着る、身につける", gender: null },
+  { de: "schick",                jp: "おしゃれな",       gender: null },
+  { de: "zum Geburtstag",        jp: "誕生日に",         gender: null },
+  { de: "gefallen",              jp: "気に入る",         gender: null },
+  { de: "stehen",                jp: "似合う",           gender: null },
+  { de: "passen",                jp: "合う、サイズが合う", gender: null },
+  { de: "schenken",              jp: "贈る",             gender: null },
+  { de: "helfen",                jp: "助ける",           gender: null },
+  { de: "danken",                jp: "感謝する",         gender: null },
+  { de: "schmecken",             jp: "味がする",         gender: null },
+  { de: "gehören",               jp: "〜のものである",   gender: null },
+  { de: "schwer",                jp: "重い、難しい",     gender: null },
+  { de: "brauchen",              jp: "必要とする",       gender: null },
+  { de: "Was ist denn los?",     jp: "どうしたの？",     gender: null },
+  { de: "suchen",                jp: "探す",             gender: null },
+  { de: "weg",                   jp: "なくなった、去った", gender: null },
+  { de: "vielleicht",            jp: "たぶん、おそらく", gender: null },
+  { de: "etwas",                 jp: "何か、少し",       gender: null },
+  { de: "zeigen",                jp: "見せる",           gender: null },
+  { de: "geben",                 jp: "与える",           gender: null },
+  { de: "zu Weihnachten",        jp: "クリスマスに",     gender: null },
+  { de: "circa",                 jp: "約、おおよそ",     gender: null },
+  { de: "den Führerschein machen", jp: "運転免許を取る", gender: null },
+  // 名詞
+  { de: "Roman/e",               jp: "小説",             gender: "der" },
+  { de: "Krimi/s",               jp: "推理小説",         gender: "der" },
+  { de: "Spiel/e",               jp: "ゲーム、試合",     gender: "das" },
+  { de: "Ausland",               jp: "外国",             gender: "das" },
+  { de: "Bild/er",               jp: "絵、写真",         gender: "das" },
+  { de: "Film/e",                jp: "映画",             gender: "der" },
+  { de: "Oper/n",                jp: "オペラ",           gender: "die" },
+  { de: "Gepäck",                jp: "荷物",             gender: "das" },
+  { de: "Armbanduhr/en",         jp: "腕時計",           gender: "die" },
+  { de: "Baumkuchen",            jp: "バウムクーヘン",   gender: "der" },
+  { de: "Hilfe/n",               jp: "助け、援助",       gender: "die" },
+  { de: "Handschuh/e",           jp: "手袋",             gender: "der" },
+  { de: "Idee/n",                jp: "アイデア",         gender: "die" },
+  { de: "Tipp/s",                jp: "ヒント、アドバイス", gender: "der" },
+  { de: "Reiseführer",           jp: "ガイドブック",     gender: "der" },
+  { de: "Computer",              jp: "コンピューター",   gender: "der" },
+  { de: "Praktikum/Praktika",    jp: "インターンシップ", gender: "das" },
+  // 服・アクセサリー（名詞）
+  { de: "Schuh/e",               jp: "靴",               gender: "der" },
+  { de: "Hose/n",                jp: "ズボン",           gender: "die" },
+  { de: "Halskette/n",           jp: "ネックレス",       gender: "die" },
+  { de: "Gürtel",                jp: "ベルト",           gender: "der" },
+  { de: "Hut/Hüte",              jp: "帽子",             gender: "der" },
+  { de: "Socke/n",               jp: "靴下",             gender: "die" },
+  { de: "Strickjacke/n",         jp: "カーディガン",     gender: "die" },
+  { de: "Pullover",              jp: "セーター",         gender: "der" },
+  { de: "Kleid/er",              jp: "ドレス、ワンピース", gender: "das" },
+  { de: "Jacke/n",               jp: "ジャケット",       gender: "die" },
+  { de: "Ohrring/e",             jp: "イヤリング",       gender: "der" },
+  { de: "Ring/e",                jp: "指輪",             gender: "der" },
+  { de: "Anzug/Anzüge",          jp: "スーツ",           gender: "der" },
+  { de: "Krawatte/n",            jp: "ネクタイ",         gender: "die" },
+  { de: "Rock/Röcke",            jp: "スカート",         gender: "der" },
+  { de: "T-Shirt/s",             jp: "Tシャツ",          gender: "das" },
+  { de: "Hemd/en",               jp: "シャツ（男性用）", gender: "das" },
+  { de: "Bluse/n",               jp: "ブラウス",         gender: "die" },
+  { de: "Schal/s",               jp: "マフラー",         gender: "der" },
+  { de: "Mantel/Mäntel",         jp: "コート",           gender: "der" },
+];
+
+// ── タブ切り替え ──
+let currentTab = 'normal';
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-normal').classList.toggle('active', tab === 'normal');
+  document.getElementById('tab-exam').classList.toggle('active', tab === 'exam');
+  document.getElementById('pane-normal').classList.toggle('active', tab === 'normal');
+  document.getElementById('pane-exam').classList.toggle('active', tab === 'exam');
+  // タブバーをクイズ中は非表示
+  const bar = document.getElementById('main-tab-bar');
+  bar.style.display = 'flex';
+}
+
+// ── 期末クイズ ──
+let examQuestions = [], examCurrent = 0, examScore = 0;
+let examWrong = [];
+let examArticleCorrect = false, examChosenArticle = '';
+let examAnswered = false;
+
+function initExam() {
+  document.getElementById('exam-word-count').textContent = EXAM_WORDS.length;
+}
+
+function startExamQuiz() {
+  examQuestions = shuffle([...EXAM_WORDS]);
+  examCurrent = 0; examScore = 0; examWrong = []; examAnswered = false;
+  examShowArea('exam-quiz-area');
+  document.getElementById('main-tab-bar').style.display = 'none';
+  examShowQ();
+}
+
+function examShowQ() {
+  const q = examQuestions[examCurrent];
+  const total = examQuestions.length;
+  document.getElementById('exam-q-num').textContent = examCurrent + 1;
+  document.getElementById('exam-q-tot').textContent = total;
+  document.getElementById('exam-score-now').textContent = examScore;
+  document.getElementById('exam-prog-bar').style.width = (examCurrent / total * 100) + '%';
+  document.getElementById('exam-feedback').style.display = 'none';
+  document.getElementById('exam-feedback').className = 'feedback';
+  document.getElementById('exam-answer-reveal').style.display = 'none';
+  document.getElementById('exam-next-btn').style.display = 'none';
+  ['exam-step-article','exam-step-word','exam-step-other'].forEach(id =>
+    document.getElementById(id).style.display = 'none');
+  examArticleCorrect = false; examChosenArticle = ''; examAnswered = false;
+
+  if (q.gender) {
+    document.getElementById('exam-q-label').textContent = '① 定冠詞を選んでください';
+    document.getElementById('exam-q-word').textContent = q.jp;
+    document.getElementById('exam-q-sub').textContent = '';
+    document.querySelectorAll('#exam-step-article .art-btn').forEach(b => { b.className='art-btn'; b.disabled=false; });
+    document.getElementById('exam-step-article').style.display = 'block';
+  } else {
+    document.getElementById('exam-q-label').textContent = 'ドイツ語を入力してください';
+    document.getElementById('exam-q-word').textContent = q.jp;
+    document.getElementById('exam-q-sub').textContent = '';
+    const inp = document.getElementById('exam-other-input');
+    inp.value=''; inp.className='ans-input'; inp.disabled=false;
+    document.getElementById('exam-step-other').style.display = 'block';
+    setTimeout(() => inp.focus(), 50);
+  }
+}
+
+function examAnswerArticle(selected) {
+  if (examAnswered) return;
+  const q = examQuestions[examCurrent];
+  examChosenArticle = selected;
+  examArticleCorrect = (selected === q.gender);
+  document.querySelectorAll('#exam-step-article .art-btn').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === q.gender) b.classList.add('reveal');
+    if (b.textContent === selected) b.classList.add(examArticleCorrect ? 'correct' : 'wrong');
+  });
+  setTimeout(() => {
+    document.getElementById('exam-step-article').style.display = 'none';
+    document.getElementById('exam-q-label').textContent = '② 単語（複数形）を入力してください';
+    const label = document.getElementById('exam-article-result-label');
+    label.innerHTML = examArticleCorrect
+      ? `<span style="color:var(--correct)">✓ ${q.gender}</span> は正解！　次は単語を入力`
+      : `<span style="color:var(--wrong)">✗ ${selected}</span>　正解は <span style="color:var(--correct)">${q.gender}</span>　続けて単語を入力`;
+    const inp = document.getElementById('exam-word-input');
+    inp.value=''; inp.className='ans-input'; inp.disabled=false;
+    document.getElementById('exam-step-word').style.display = 'block';
+    setTimeout(() => inp.focus(), 50);
+  }, 700);
+}
+
+function examCheckWord() {
+  if (examAnswered) return;
+  const q = examQuestions[examCurrent];
+  const inp = document.getElementById('exam-word-input');
+  const userRaw = inp.value.trim();
+  if (!userRaw) return;
+  examAnswered = true; inp.disabled = true;
+  const norm = s => s.toLowerCase().replace(/\.\.\./g,'').trim();
+  const wordOk = norm(userRaw) === norm(q.de);
+  const fullyOk = examArticleCorrect && wordOk;
+  if (fullyOk) {
+    examScore++;
+    document.getElementById('exam-score-now').textContent = examScore;
+    inp.classList.add('correct');
+    examShowFeedback('correct', `完璧！ ${q.gender} ${q.de} ＝ ${q.jp}`);
+  } else {
+    inp.classList.add('wrong');
+    const parts = [];
+    if (!examArticleCorrect) parts.push(`定冠詞: ${examChosenArticle} → 正解 ${q.gender}`);
+    if (!wordOk) parts.push(`単語: ${userRaw} → 正解 ${q.de}`);
+    examWrong.push({ q, articleOk: examArticleCorrect, wordOk, userArticle: examChosenArticle, userWord: userRaw });
+    examShowFeedback('wrong', '不正解。' + parts.join('　'));
+    document.getElementById('exam-answer-reveal').textContent = `正解: ${q.gender} ${q.de}`;
+    document.getElementById('exam-answer-reveal').style.display = 'block';
+  }
+  document.getElementById('exam-next-btn').style.display = 'block';
+}
+
+function examCheckOther() {
+  if (examAnswered) return;
+  const q = examQuestions[examCurrent];
+  const inp = document.getElementById('exam-other-input');
+  const userRaw = inp.value.trim();
+  if (!userRaw) return;
+  examAnswered = true; inp.disabled = true;
+  const norm = s => s.toLowerCase().replace(/^(der|die|das)\s+/i,'').replace(/\.\.\./g,'').trim();
+  const ok = norm(userRaw) === norm(q.de);
+  if (ok) {
+    examScore++;
+    document.getElementById('exam-score-now').textContent = examScore;
+    inp.classList.add('correct');
+    examShowFeedback('correct', `正解！ ${q.de} ＝ ${q.jp}`);
+  } else {
+    inp.classList.add('wrong');
+    examWrong.push({ q, articleOk: true, wordOk: false, userArticle: '', userWord: userRaw });
+    examShowFeedback('wrong', `不正解。正解は「${q.de}」`);
+    document.getElementById('exam-answer-reveal').textContent = `正解: ${q.de}`;
+    document.getElementById('exam-answer-reveal').style.display = 'block';
+  }
+  document.getElementById('exam-next-btn').style.display = 'block';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (currentTab === 'exam') {
+    const ws = document.getElementById('exam-step-word');
+    const os = document.getElementById('exam-step-other');
+    const nb = document.getElementById('exam-next-btn');
+    if (ws.style.display !== 'none' && !document.getElementById('exam-word-input').disabled) examCheckWord();
+    else if (os.style.display !== 'none' && !document.getElementById('exam-other-input').disabled) examCheckOther();
+    else if (nb.style.display !== 'none') examNextQ();
+  }
+});
+
+function examShowFeedback(type, msg) {
+  const el = document.getElementById('exam-feedback');
+  el.textContent = msg; el.className = 'feedback ' + type; el.style.display = 'block';
+}
+
+function examNextQ() {
+  if (++examCurrent >= examQuestions.length) examShowResult();
+  else examShowQ();
+}
+
+function examShowResult() {
+  examShowArea('exam-result-area');
+  document.getElementById('main-tab-bar').style.display = 'none';
+  const total = examQuestions.length;
+  document.getElementById('exam-res-score').innerHTML = examScore + '<span>/' + total + '</span>';
+  const pct = Math.round(examScore / total * 100);
+  document.getElementById('exam-res-msg').textContent =
+    (pct===100?'🎉 パーフェクト！':pct>=80?'✨ よくできました！':pct>=60?'📖 もう少し！':'💪 復習してもう一度！') + ` (${pct}%)`;
+  const wl = document.getElementById('exam-wrong-list');
+  if (!examWrong.length) { wl.innerHTML=''; return; }
+  wl.innerHTML = '<div class="wl-title">間違えた単語</div>' +
+    examWrong.map(w => {
+      const isNoun = w.q.gender !== null;
+      let detail = isNoun
+        ? (!w.articleOk ? '<span style="color:var(--wrong)">定冠詞×</span> ' : '') + (!w.wordOk ? '<span style="color:var(--wrong)">単語×</span>' : '')
+        : `<span style="color:var(--wrong)">${w.userWord}</span>`;
+      return `<div class="wrong-item">
+        <div><div class="wi-q">${w.q.jp}</div></div>
+        <div class="wi-right">
+          <div class="wi-correct">${isNoun ? w.q.gender+' ' : ''}${w.q.de}</div>
+          <div class="wi-user">${detail}</div>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+function goExamSetup() {
+  examShowArea('exam-setup-area');
+  document.getElementById('main-tab-bar').style.display = 'flex';
+}
+
+function examShowArea(id) {
+  ['exam-setup-area','exam-quiz-area','exam-result-area'].forEach(i =>
+    document.getElementById(i).style.display = i===id ? 'block' : 'none');
+}
+
+initExam();
+</script>
+</body>
+</html>
